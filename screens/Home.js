@@ -10,6 +10,9 @@ const Home = ({navigation}) =>{
             <TouchableOpacity onPress={()=> navigation.navigate('Game')} style={{borderWidth: 1, borderColor:'white', borderRadius: 5, marginTop: 20, paddingVertical: 5, paddingHorizontal: 10}}>
                 <Text style={{color:'white', fontSize: 25}}>Start game</Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={()=> navigation.navigate('LeaderBoard')} style={{borderWidth: 1, borderColor:'white', borderRadius: 5, marginTop: 20, paddingVertical: 5, paddingHorizontal: 10}}>
+                <Text style={{color:'white', fontSize: 25}}>Leader Board</Text>
+            </TouchableOpacity>
         </View>
     )
 }
