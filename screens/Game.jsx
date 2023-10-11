@@ -6,6 +6,8 @@ import {
   StatusBar,
   TouchableOpacity,
   Image,
+  Dimensions,
+  PanResponder,
 } from "react-native";
 import { activateKeepAwakeAsync } from "expo-keep-awake";
 import Matter from "matter-js";
@@ -26,10 +28,90 @@ export default class App extends Component {
       running: true, // game on / off
       start: false, // ball thrown
       lives: 3, // nb lives
+      paddleX: 0,
+      bricks: [
+        { x: 10, y: 100, active: true },
+        { x: 70, y: 100, active: true },
+        { x: 130, y: 100, active: true },
+        { x: 190, y: 100, active: true },
+        { x: 250, y: 100, active: true },
+        { x: 310, y: 100, active: true },
+        { x: 370, y: 100, active: true },
+        { x: 430, y: 100, active: true },
+        { x: 490, y: 100, active: true },
+        { x: 550, y: 100, active: true },
+        // Add more bricks as needed
+      ],
+      paddlePosition: (Dimensions.get("window").width - 100) / 2,
+      x: 0,
+      y: 0,
+      z: 0,
+      subscription: null,
     };
     this.gameEngine = null;
     this.entities = this.setupWorld();
+    this.panResponder = PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: this.handlePaddleMove,
+    })
+    
   }
+
+
+  handlePaddleMove = (e, gestureState) => {
+    if (this.entities.racket) {
+      // Update the position of the racket's body
+      let newPaddlePosition = gestureState.moveX - 100 / 2;
+      if (newPaddlePosition < 0) {
+        newPaddlePosition = 0;
+      } else if (
+        newPaddlePosition > Dimensions.get("window").width - 100
+      ) {
+        newPaddlePosition = Dimensions.get("window").width - 100;
+      }
+  
+      Matter.Body.setPosition(this.entities.racket.body, {
+        x: newPaddlePosition + 100 / 2, // Adjusted for the width of the racket
+        y: this.entities.racket.body.position.y, // Keep the same Y position
+      });
+  
+      // Update the state if you need to track the position in your component's state
+      this.setState({ paddlePosition: newPaddlePosition });
+    }
+  };
+  
+   checkGameOver = () => {
+    // Check if all bricks are destroyed
+    if (bricks.every((brick) => !brick.active)) {
+      // Handle game over, e.g., reset the ball's position and bricks
+      setBallPosition({
+        x: Dimensions.get("window").width / 2 - BALL_SIZE / 2,
+        y: Dimensions.get("window").height - 100,
+      });
+      setBricks([
+        { x: 10, y: 100, active: true },
+        { x: 70, y: 100, active: true },
+        // Add more bricks as needed
+      ]);
+      // You can also increment the level or perform other actions here.
+    }
+
+    // Check if the ball has gone below the bottom of the screen
+    if (ballPosition.y > Dimensions.get("window").height) {
+      // Handle game over, e.g., reset the ball's position and bricks
+      setBallPosition({
+        x: Dimensions.get("window").width / 2 - BALL_SIZE / 2,
+        y: Dimensions.get("window").height - 100,
+      });
+      setBricks([
+        { x: 10, y: 100, active: true },
+        { x: 70, y: 100, active: true },
+        // Add more bricks as needed
+      ]);
+      // You may also decrement lives here if applicable.
+    }
+  };
 
   setupWorld = () => {
     let engine = Matter.Engine.create({ enableSleeping: false });
@@ -123,12 +205,17 @@ export default class App extends Component {
       }
     });
 
+    
+
+    
+
     return {
       physics: { engine: engine, world: world },
       racket: {
         body: racket,
         size: [Constants.RACKET_WIDTH, Constants.RACKET_HEIGHT],
         color: "#393eca",
+        paddlePosition: this.state.paddlePosition,
         renderer: Racket,
       },
       ball: {
@@ -163,6 +250,8 @@ export default class App extends Component {
       },
     };
   };
+
+  
 
   onEvent = (e) => {
     if (e.type === "game-over") {
@@ -241,9 +330,41 @@ export default class App extends Component {
     });
   };
 
+  componentDidMount() {
+    this._subscribe();
+  }
+
+  componentWillUnmount() {
+    this._unsubscribe();
+  } 
+
+  _slow = () => Gyroscope.setUpdateInterval(1000);
+
+  _fast = () => Gyroscope.setUpdateInterval(16);
+
+  _subscribe = () => {
+    this.setState({
+      subscription: Gyroscope.addListener(gyroscopeData => {
+        this.setState({
+          x: gyroscopeData.x,
+          y: gyroscopeData.y,
+          z: gyroscopeData.z,
+        });
+      }),
+    });
+  };
+
+  _unsubscribe = () => {
+    if (this.state.subscription) {
+      this.state.subscription.remove();
+      this.setState({ subscription: null });
+    }
+  };
+
+
   render() {
     return (
-      <View style={styles.container}>
+      <View style={styles.container} {...this.panResponder.panHandlers}>
         <GameEngine
           ref={(ref) => {
             this.gameEngine = ref;
@@ -314,6 +435,13 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     justifyContent: "center",
     alignItems: "center",
+  },
+  paddle: {
+    position: "absolute",
+    width: 100,
+    height: 20,
+    backgroundColor: "red",
+    marginBottom: 50
   },
   startFullScreen: {
     position: "absolute",
