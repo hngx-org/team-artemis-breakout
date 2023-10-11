@@ -1,14 +1,37 @@
-import {React} from 'react'
-import { Text, View } from 'react-native'
+import { React } from 'react'
+import { Text, View, FlatList, StyleSheet, SafeAreaView } from 'react-native'
+import data from '../data/BoardData'
+import BoardItems from '../components/BoardItems'
 
-const LeaderBoard = () =>{
-    return(
-        <View style={{flex: 1, justifyContent:'center', alignItems:'center', backgroundColor:'black'}}>
-            <Text style={{color:'white', fontSize: 45, fontWeight:'bold'}}>Leader Board</Text>
-            <Text style={{marginTop: 60, color:'white', fontSize: 30}}>TEAM ARTEMIS</Text>
-            <Text style={{color:'white', fontSize: 40, fontWeight:'bold'}}>3574</Text>
-        </View>
-    )
-}
+const LeaderBoard = () => {
+    const sortedData = data.slice().sort((a, b) => b.score - a.score);
+
+    for (let i = 0; i < sortedData.length; i++) {
+        sortedData[i].rank = i + 1;
+    }
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>Leader Board</Text>
+            <FlatList
+                data={sortedData}
+                renderItem={({ item }) => <BoardItems player={item} />}
+            />
+        </SafeAreaView>
+    );
+};
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        backgroundColor: 'black',
+    },
+    title: {
+        color: 'white',
+        fontSize: 28,
+        fontWeight: '400',
+        marginVertical: 20
+    }
+})
 
 export default LeaderBoard
