@@ -20,6 +20,8 @@ import Wall from "../main/Wall";
 import heart from "../assets/heart.png";
 //import { gyroscope } from "react-native-sensors";
 import { Gyroscope } from "expo-sensors";
+import Brick from "../main/Brick";
+import Brick2 from "../main/Brick2";
 
 export default class App extends Component {
   constructor(props) {
@@ -29,19 +31,7 @@ export default class App extends Component {
       start: false, // ball thrown
       lives: 3, // nb lives
       paddleX: 0,
-      bricks: [
-        { x: 10, y: 100, active: true },
-        { x: 70, y: 100, active: true },
-        { x: 130, y: 100, active: true },
-        { x: 190, y: 100, active: true },
-        { x: 250, y: 100, active: true },
-        { x: 310, y: 100, active: true },
-        { x: 370, y: 100, active: true },
-        { x: 430, y: 100, active: true },
-        { x: 490, y: 100, active: true },
-        { x: 550, y: 100, active: true },
-        // Add more bricks as needed
-      ],
+
       paddlePosition: (Dimensions.get("window").width - 100) / 2,
       x: 0,
       y: 0,
@@ -54,10 +44,8 @@ export default class App extends Component {
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: this.handlePaddleMove,
-    })
-    
+    });
   }
-
 
   handlePaddleMove = (e, gestureState) => {
     if (this.entities.racket) {
@@ -65,51 +53,17 @@ export default class App extends Component {
       let newPaddlePosition = gestureState.moveX - 100 / 2;
       if (newPaddlePosition < 0) {
         newPaddlePosition = 0;
-      } else if (
-        newPaddlePosition > Dimensions.get("window").width - 100
-      ) {
+      } else if (newPaddlePosition > Dimensions.get("window").width - 100) {
         newPaddlePosition = Dimensions.get("window").width - 100;
       }
-  
+
       Matter.Body.setPosition(this.entities.racket.body, {
         x: newPaddlePosition + 100 / 2, // Adjusted for the width of the racket
         y: this.entities.racket.body.position.y, // Keep the same Y position
       });
-  
+
       // Update the state if you need to track the position in your component's state
       this.setState({ paddlePosition: newPaddlePosition });
-    }
-  };
-  
-   checkGameOver = () => {
-    // Check if all bricks are destroyed
-    if (bricks.every((brick) => !brick.active)) {
-      // Handle game over, e.g., reset the ball's position and bricks
-      setBallPosition({
-        x: Dimensions.get("window").width / 2 - BALL_SIZE / 2,
-        y: Dimensions.get("window").height - 100,
-      });
-      setBricks([
-        { x: 10, y: 100, active: true },
-        { x: 70, y: 100, active: true },
-        // Add more bricks as needed
-      ]);
-      // You can also increment the level or perform other actions here.
-    }
-
-    // Check if the ball has gone below the bottom of the screen
-    if (ballPosition.y > Dimensions.get("window").height) {
-      // Handle game over, e.g., reset the ball's position and bricks
-      setBallPosition({
-        x: Dimensions.get("window").width / 2 - BALL_SIZE / 2,
-        y: Dimensions.get("window").height - 100,
-      });
-      setBricks([
-        { x: 10, y: 100, active: true },
-        { x: 70, y: 100, active: true },
-        // Add more bricks as needed
-      ]);
-      // You may also decrement lives here if applicable.
     }
   };
 
@@ -118,6 +72,25 @@ export default class App extends Component {
     let world = engine.world;
     world.gravity.y = 0;
 
+    let bricks = Matter.Bodies.rectangle(
+      Constants.BRICK_START_X_POSITION,
+      Constants.BRICK_START_Y_POSITION,
+      Constants.BRICK_WIDTH,
+      Constants.BRICK_HEIGHT,
+      {
+        isStatic: true,
+      }
+    );
+
+    let bricks2 = Matter.Bodies.rectangle(
+      Constants.BRICK_START_X_POSITION2,
+      Constants.BRICK_START_Y_POSITION2,
+      Constants.BRICK_WIDTH2,
+      Constants.BRICK_HEIGHT2,
+      {
+        isStatic: true,
+      }
+    );
     let racket = Matter.Bodies.rectangle(
       Constants.RACKET_START_X_POSITION,
       Constants.RACKET_Y_POSITION,
@@ -128,7 +101,7 @@ export default class App extends Component {
 
     let ball = Matter.Bodies.circle(
       Constants.RACKET_START_X_POSITION,
-      Constants.RACKET_Y_POSITION - 20,
+      Constants.RACKET_Y_POSITION - 12,
       6,
       {
         isStatic: false,
@@ -184,6 +157,8 @@ export default class App extends Component {
     floor.label = "floor";
 
     Matter.World.add(world, [
+      bricks,
+      bricks2,
       racket,
       ball,
       wallLeft,
@@ -205,12 +180,20 @@ export default class App extends Component {
       }
     });
 
-    
-
-    
-
     return {
       physics: { engine: engine, world: world },
+      brick: {
+        body: bricks,
+        color: "#29ff11",
+        size: [Constants.BRICK_WIDTH, Constants.BRICK_HEIGHT],
+        renderer: Brick,
+      },
+      brick2: {
+        body: bricks2,
+        color: "#29ff11",
+        size: [Constants.BRICK_WIDTH2, Constants.BRICK_HEIGHT2],
+        renderer: Brick2,
+      },
       racket: {
         body: racket,
         size: [Constants.RACKET_WIDTH, Constants.RACKET_HEIGHT],
@@ -220,7 +203,7 @@ export default class App extends Component {
       },
       ball: {
         body: ball,
-        size: [20, 20],
+        size: [15, 15],
         color: "#ffffff",
         renderer: Ball,
       },
@@ -251,8 +234,6 @@ export default class App extends Component {
     };
   };
 
-  
-
   onEvent = (e) => {
     if (e.type === "game-over") {
       this.resetBall();
@@ -282,28 +263,7 @@ export default class App extends Component {
   start = (e) => {
     console.log("start");
     activateKeepAwakeAsync();
-    /*  gyroscope.subscribe(({ x, y, z, timestamp }) => {
-      //this.setState({gyroscopeY: y, gyroscopeX: x, gyroscopeZ: z})
-      let newRacketX = this.entities.racket.body.position.x;
-      if (Math.abs(x) > Math.abs(y)) {
-        newRacketX = newRacketX + x;
-      } else {
-        newRacketX = newRacketX + y;
-      }
 
-      if (newRacketX < Constants.RACKET_MIN_X_POSITION) {
-        newRacketX = Constants.RACKET_MIN_X_POSITION;
-      }
-
-      if (newRacketX > Constants.RACKET_MAX_X_POSITION) {
-        newRacketX = Constants.RACKET_MAX_X_POSITION;
-      }
-
-      Matter.Body.setPosition(this.entities.racket.body, {
-        x: newRacketX,
-        y: this.entities.racket.body.position.y,
-      });
-    }); */
     this.setState({
       start: true,
     });
@@ -336,7 +296,7 @@ export default class App extends Component {
 
   componentWillUnmount() {
     this._unsubscribe();
-  } 
+  }
 
   _slow = () => Gyroscope.setUpdateInterval(1000);
 
@@ -344,7 +304,7 @@ export default class App extends Component {
 
   _subscribe = () => {
     this.setState({
-      subscription: Gyroscope.addListener(gyroscopeData => {
+      subscription: Gyroscope.addListener((gyroscopeData) => {
         this.setState({
           x: gyroscopeData.x,
           y: gyroscopeData.y,
@@ -361,8 +321,8 @@ export default class App extends Component {
     }
   };
 
-
   render() {
+    //console.log(this.entities.ball);
     return (
       <View style={styles.container} {...this.panResponder.panHandlers}>
         <GameEngine
@@ -373,7 +333,13 @@ export default class App extends Component {
           systems={[Physics]}
           running={this.state.running}
           onEvent={this.onEvent}
-          entities={this.entities}
+          entities={{
+            ...this.entities,
+            object: {
+              position: [20, 20],
+              renderer: <View style={styles.object} />,
+            },
+          }}
         >
           <StatusBar hidden={true} />
         </GameEngine>
@@ -441,7 +407,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 20,
     backgroundColor: "red",
-    marginBottom: 50
+    marginBottom: 50,
   },
   startFullScreen: {
     position: "absolute",
@@ -467,6 +433,11 @@ const styles = StyleSheet.create({
     bottom: 5,
     left: 20,
     flex: 1,
+  },
+  object: {
+    width: 50,
+    height: 50,
+    backgroundColor: "blue",
   },
   livesText: {
     position: "absolute",
