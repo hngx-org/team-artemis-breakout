@@ -19,9 +19,8 @@ const Racket = (props) => {
 
 
   return (
-    <View style={{ position: "absolute", left: x, top: y, width: width, height: height, backgroundColor: '#0099ff', borderRadius: 10, borderColor: props.color, borderWidth: 3, justifyContent: 'space-between', flexDirection: 'row', }} >
-        <View style={wheelstyle}></View>
-        <View style={wheelstyle}></View>
+    <View style={{ position: "absolute", left: x, top: y, width: width, height: height, backgroundColor: 'black', justifyContent: 'space-between', flexDirection: 'row', }} >
+
       </View>
   );
 };

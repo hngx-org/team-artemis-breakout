@@ -16,7 +16,7 @@ const colors = {
   brown: 'brown',
   purple: 'purple',
   green: 'green',
-  black: 'black',
+  black: 'green',
   grey: 'grey',
   magenta: 'magenta',
   gold: 'gold',

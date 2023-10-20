@@ -15,8 +15,9 @@ const Racket = (props) => {
         top: y,
         width: width,
         height: height,
-        backgroundColor: props.color,
+        backgroundColor: "white",
         borderRadius: 50,
+        padding: 8
       }}
     />
   );

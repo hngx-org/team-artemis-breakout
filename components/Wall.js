@@ -15,7 +15,7 @@ const Wall = (props) => {
         top: y,
         width: width,
         height: height,
-        backgroundColor: props.color,
+        backgroundColor: 'red',
       }}
     />
   );
