@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Navigation from './Navigation/Navigation';
 import { useEffect } from 'react';
 import { Audio } from 'expo-av';
+import { AllProvider } from './context/AllContext';
 
 export default function App() {
   useEffect(() => {
@@ -33,7 +34,9 @@ export default function App() {
     };
   }, []);
   return (
+    <AllProvider>
     <Navigation />
+    </AllProvider>
   );
 }
 
