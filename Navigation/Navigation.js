@@ -2,6 +2,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { React } from 'react'
 import { createStackNavigator } from '@react-navigation/stack';
 import Home from '../screens/Home';
+import Home2 from '../screens/HomeScreen';
 import GameOver from '../screens/GameOver';
 import LeaderBoard from '../screens/LeaderBoard';
 import BestGameEver from '../screens/Game';
@@ -36,7 +37,7 @@ const Navigation = () => {
                         headerTintColor: "black",
                     }} />
                 <Stack.Screen name="Game"
-                    component={BestGameEver}
+                    component={Home2}
                     options={{
                         headerShown: false,
                         gestureEnabled: false,

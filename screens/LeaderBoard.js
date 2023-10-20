@@ -1,7 +1,7 @@
 import { React } from 'react'
 import { Text, View, FlatList, StyleSheet, SafeAreaView } from 'react-native'
 import data from '../data/BoardData'
-import BoardItems from '../components/BoardItems'
+import BoardItems from '../components1/BoardItems'
 
 const LeaderBoard = () => {
     const sortedData = data.slice().sort((a, b) => b.score - a.score);
