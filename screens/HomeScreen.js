@@ -8,6 +8,8 @@ import {
   Image,
   Animated,
   ImageBackground,
+  PanResponder,
+  Dimensions,
 } from "react-native";
 import Matter from "matter-js";
 import { GameEngine } from "react-native-game-engine";
@@ -37,6 +39,7 @@ const App = ({ navigation }) => {
   const [score, setScore] = useState(0);
   //list the items you need in the context
   const { level, setLevel, lives, setLives } = useContext(AllContext);
+  const [paddlePosition, setPaddlePosition] = useState((Dimensions.get("window").width - 100) / 2)
 
   const moveRacketLeft = () => {
     const newRacketX = entities.current.racket.body.position.x - 40;
@@ -56,6 +59,25 @@ const App = ({ navigation }) => {
         y: entities.current.racket.body.position.y,
       });
     }
+  };
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderMove: handlePaddleMove,
+  });
+
+  const handlePaddleMove = (e, gestureState) => {
+    // Update the paddle position based on the user's touch or drag gesture
+    let newPaddlePosition = gestureState.moveX - PADDLE_WIDTH / 2;
+    if (newPaddlePosition < 0) {
+      newPaddlePosition = 0;
+    } else if (
+      newPaddlePosition >
+      Dimensions.get("window").width - PADDLE_WIDTH
+    ) {
+      newPaddlePosition = Dimensions.get("window").width - PADDLE_WIDTH;
+    }
+    setPaddlePosition(newPaddlePosition);
   };
 
   // this is what we used in breaking the bricks
@@ -961,6 +983,7 @@ const App = ({ navigation }) => {
         body: racket,
         size: [Constants.RACKET_WIDTH, Constants.RACKET_HEIGHT],
         color: "blue",
+        paddlePosition: paddlePosition,
         renderer: Racket,
       },
       ball: {
@@ -1033,7 +1056,7 @@ const App = ({ navigation }) => {
       brick7: {
         body: brick7,
         size: { width: Constants.BRICK_WIDTH, height: Constants.BRICK_HEIGHT },
-        color: "black",
+        color: "pink",
         renderer: BrickRenderer,
       },
       brick8: {
@@ -1141,7 +1164,7 @@ const App = ({ navigation }) => {
       brick25: {
         body: brick25,
         size: { width: Constants.BRICK_WIDTH, height: Constants.BRICK_HEIGHT },
-        color: "black",
+        color: "pink",
         renderer: BrickRenderer,
       },
       brick26: {
@@ -1189,7 +1212,7 @@ const App = ({ navigation }) => {
       brick33: {
         body: brick33,
         size: { width: Constants.BRICK_WIDTH, height: Constants.BRICK_HEIGHT },
-        color: "black",
+        color: "pink",
         renderer: BrickRenderer,
       },
       brick34: {
@@ -1393,9 +1416,8 @@ const App = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require("../assets/home.png")} // Set the path to your image
+    <View style={styles.container} {...panResponder.panHandlers} >
+      <ImageBackground // Set the path to your image
         style={styles.imageBackground}
       >
         <GameEngine
@@ -1408,7 +1430,7 @@ const App = ({ navigation }) => {
         >
           <StatusBar hidden={true} />
 
-          <Button
+          {/* <Button
             title="Go Back"
             textstyle={{ fontSize: 20, fontFamily: fonts.extraBold }}
             style={{
@@ -1423,14 +1445,14 @@ const App = ({ navigation }) => {
               zIndex: 999999,
             }}
             onPress={() => navigation.goBack()}
-          />
+          /> */}
         </GameEngine>
 
         {running && !startGame && (
           <TouchableOpacity style={styles.fullScreenButton} onPress={start}>
             <View style={styles.startFullScreen}>
               <Text style={styles.startText}>
-                Click anywhere on the screen to shoot the ball in that direction
+                Click here to start
               </Text>
             </View>
           </TouchableOpacity>
@@ -1459,11 +1481,6 @@ const App = ({ navigation }) => {
         <Text style={{ ...styles.livesText, top: 20 }}>{lives}</Text>
         <Text style={{ ...styles.livesText, top: 20, left: 300, fontSize: 15 }}>
           Score: {score}
-        </Text>
-        <Text
-          style={{ ...styles.livesText, bottom: 57, left: 245, fontSize: 15 }}
-        >
-          Level:{" "}
         </Text>
         <Text
           style={{ ...styles.livesText, bottom: 25, left: 255, fontSize: 40 }}
@@ -1512,6 +1529,7 @@ const styles = StyleSheet.create({
     position: "relative",
     resizeMode: "cover", // You can adjust the resizeMode as needed
     justifyContent: "center", // Adjust as needed
+    backgroundColor:'#add8e6'
   },
   gameContainer: {
     position: "absolute",
