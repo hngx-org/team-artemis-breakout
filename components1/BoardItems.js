@@ -2,14 +2,14 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native'
 
 
 const BoardItems = (props) => {
-    const { name, score, rank } = props.player
+    const { username, score, rank } = props.player
     return (
         <View style={{width: Dimensions.get('window').width, paddingVertical: 10, paddingHorizontal: 20 }}>
             <View style={styles.container}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={styles.circle} />
                     <View>
-                        <Text style={styles.player}>{name}</Text>
+                        <Text style={styles.player}>{username}</Text>
                         <Text style={styles.marks}>{`${score} marks`}</Text>
                     </View>
                 </View>
