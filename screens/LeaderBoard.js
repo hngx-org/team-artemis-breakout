@@ -1,14 +1,28 @@
 import { React } from 'react'
 import { Text, View, FlatList, StyleSheet, SafeAreaView } from 'react-native'
-import data from '../data/BoardData'
+// import data from '../data/BoardData'
 import BoardItems from '../components1/BoardItems'
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { supabase } from '../utils/supabase';
 
 const LeaderBoard = () => {
-    const sortedData = data.slice().sort((a, b) => b.score - a.score);
+    
+    const [info, setInfo] = useState([])
+    const sortedData = info?.slice().sort((a, b) => b.score - a.score);
 
-    for (let i = 0; i < sortedData.length; i++) {
+    for (let i = 0; i < sortedData?.length; i++) {
         sortedData[i].rank = i + 1;
     }
+
+    useEffect(()=>{
+        const getUsers = async() =>{
+            const {data} = await supabase.from('users').select('*')
+            console.log(data)
+            setInfo(data)
+        }
+        getUsers()
+    },[])
 
     return (
         <SafeAreaView style={styles.container}>

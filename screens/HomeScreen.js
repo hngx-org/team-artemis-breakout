@@ -28,6 +28,8 @@ import Button from "../components/Button";
 import { AntDesign } from "@expo/vector-icons";
 //import the two below for context check if they have been previously imported and recheck if the location is correct
 import { AllProvider, AllContext } from "../context/AllContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "../utils/supabase";
 
 const App = ({ navigation }) => {
   // const [isGamePaused, setIsGamePaused] = useState(false);
@@ -40,6 +42,20 @@ const App = ({ navigation }) => {
   //list the items you need in the context
   const { level, setLevel, lives, setLives } = useContext(AllContext);
   const [paddlePosition, setPaddlePosition] = useState((Dimensions.get("window").width - 100) / 2)
+  const [force, setForce] = useState(7)
+  const [sentScore, setSentScore] = useState(0)
+
+  useState(()=>{
+    if(score >= 3){
+      setForce(8)
+    }
+    else if(score >= 8){
+      setForce(15)
+    }
+    else if(score >= 15){
+      setForce(20)
+    }
+  },[score])
 
   const moveRacketLeft = () => {
     const newRacketX = entities.current.racket.body.position.x - 40;
@@ -1242,6 +1258,7 @@ const App = ({ navigation }) => {
       resetRacket();
       setRunning(false);
       setLives(0);
+      setSentScore(score)
       setScore(0);
     } else if (e.type === "collided1") {
       moveBrick1();
@@ -1358,7 +1375,6 @@ const App = ({ navigation }) => {
   const start = (e) => {
     setStartGame(true);
 
-    let force = 7;
 
     let angle = Matter.Vector.angle(entities.current.ball.body.position, {
       x: e.nativeEvent.locationX,
@@ -1371,11 +1387,17 @@ const App = ({ navigation }) => {
     });
   };
 
-  const reset = () => {
+  const reset = async() => {
     // Reset the game
     // This function should reset the game state.
     // You can call it to restart the game.
     navigation.replace("Home");
+    const user = await AsyncStorage.getItem('username')
+    console.log('user username ',sentScore)
+    await supabase.from('users').insert({
+      username:user,
+      score: sentScore
+    })
     resetBall();
     resetRacket();
     setRunning(true);
@@ -1477,9 +1499,11 @@ const App = ({ navigation }) => {
           <Ionicons name="ios-arrow-forward" size={40} color="black" />
         </TouchableOpacity>
 
+            <View style={{position:'absolute', left: 320, top: 50}}>
         <Image source={heart} style={styles.heart} />
         <Text style={{ ...styles.livesText, top: 20 }}>{lives}</Text>
-        <Text style={{ ...styles.livesText, top: 20, left: 300, fontSize: 15 }}>
+        </View>
+        <Text style={{ ...styles.livesText, top: 40, left: 310, fontSize: 15 }}>
           Score: {score}
         </Text>
         <Text
@@ -1541,18 +1565,18 @@ const styles = StyleSheet.create({
   gameOverText: {
     color: "red",
     fontSize: 48,
-    fontFamily: fonts.extraBold,
+    // fontFamily: fonts.extraBold,
   },
   gameOver: {
     color: "white",
     fontSize: 48,
-    fontFamily: fonts.extraBold,
+    // fontFamily: fonts.extraBold,
   },
   startText: {
     color: "black",
     fontSize: 30,
     textAlign: "center",
-    fontFamily: fonts.extraBold,
+    // fontFamily: fonts.extraBold,
   },
   startFullScreen: {
     position: "absolute",
@@ -1640,7 +1664,7 @@ const styles = StyleSheet.create({
   levelup: {
     color: "white",
     fontSize: 48,
-    fontFamily: fonts.extraBold,
+    // fontFamily: fonts.extraBold,
   },
 });
 

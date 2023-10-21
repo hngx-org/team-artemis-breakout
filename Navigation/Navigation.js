@@ -6,6 +6,7 @@ import Home2 from '../screens/HomeScreen';
 import GameOver from '../screens/GameOver';
 import LeaderBoard from '../screens/LeaderBoard';
 import BestGameEver from '../screens/Game';
+import Login from '../screens/Login';
 
 
 const Stack = createStackNavigator();
@@ -47,16 +48,28 @@ const Navigation = () => {
                         headerTransparent: true,
                         headerTintColor: "black",
                     }} />
-                <Stack.Screen name="LeaderBoard"
-                    component={LeaderBoard}
+                    <Stack.Screen name="Login"
+                    component={Login}
                     options={{
                         headerShown: false,
-                        gestureEnabled: false,
+                        gestureEnabled: true,
                         // headerBackTitle: false,
                         headerBackTitleVisible: true,
                         // headerTitle: true,
                         headerTransparent: true,
                         headerTintColor: "black",
+                    }} />
+                <Stack.Screen name="LeaderBoard"
+                    component={LeaderBoard}
+                    options={{
+                        headerShown: true,
+                        gestureEnabled: true,
+                        // headerBackTitle: true,
+                        headerBackTitleVisible: true,
+                        // headerTitle: true,
+                        headerTransparent: true,
+                        headerTintColor: "white",
+                        title:''
                     }} />
             </Stack.Navigator>
         </NavigationContainer>
